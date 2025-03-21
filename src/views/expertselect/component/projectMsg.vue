@@ -8,8 +8,8 @@
             <el-input v-model="projectForm.projectName" placeholder="请输入项目名称"></el-input>
           </el-form-item>
           <el-form-item label="评审时间" prop="reviewTime">
-            <el-date-picker v-model="projectForm.reviewTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss"
-              placeholder="选择日期时间"></el-date-picker>
+            <el-date-picker v-model="projectForm.reviewTime" type="datetime" :default-time="defaultTime"
+              value-format="yyyy-MM-dd HH:mm:ss" placeholder="选择日期时间"></el-date-picker>
           </el-form-item>
           <el-form-item label="专家抽取人数" prop="judgeNum">
             <el-input-number v-model="projectForm.judgeNum" :min="1"></el-input-number>
@@ -35,12 +35,12 @@
 </template>
 
 <script>
-import modal from '@/plugins/modal'
+import dayjs from 'dayjs'
 import { getExpertList, postProjectInfo } from '@/api/expert'
-
 export default {
   data() {
     return {
+      dayjs,
       loading: false,
       projectForm: {
         projectName: '',
@@ -56,24 +56,26 @@ export default {
       },
     };
   },
+  computed: {
+    defaultTime() {
+      return dayjs().format('HH:mm:ss')
+    }
+  },
   methods: {
     async submitProjectForm() {
       this.$refs.projectForm.validate(async (valid) => {
         if (valid) {
-          try {
-            const res = await postProjectInfo({ ...this.projectForm, categorys: `[${this.projectForm.categorys}]` })
-            this.$store.commit('processStatus/SET_PROCESS_STATUS', 1)
-            this.$store.commit('processStatus/SET_PROCESS_ID', res.data.id)
-          } catch (error) {
-            modal.notifyError("专家类别所选数量与抽取人数不匹配")
-          }
+          const res = await postProjectInfo({ ...this.projectForm, categorys: `[${this.projectForm.categorys}]` })
+          this.$store.commit('processStatus/SET_PROCESS_STATUS', 1)
+          this.$store.commit('processStatus/SET_PROCESS_ID', res.data.id)
 
         }
       })
     },
     resetForm() {
       this.$refs.projectForm.resetFields()
-    }
+    },
+
   },
   created() {
     getExpertList().then(res => {
