@@ -1,36 +1,33 @@
 import request from '@/utils/request'
 
-// 获取专家列表
+// 获取专家类别
 export function getExpertList() {
   return request({
-    url: 'https://m1.apifoxmock.com/m2/6065032-0-default/274084210?apifoxApiId=274084210',
+    url: '/system/judge_category/list',
     method: 'get',
   })
 }
 // 修改专家到场状态
 export function updateExpertStatus(data) {
   return request({
-    url: 'https://m1.apifoxmock.com/m2/6065032-0-default/274094577?apifoxApiId=274094577',
+    url: '/system/project_judge',
     method: 'put',
     data
   })
 }
 
-
+// 新增项目
 export function postProjectInfo(data) {
   return request({
-    url: 'https://m1.apifoxmock.com/m2/6065032-0-default/274090774?apifoxApiId=274090774',
+    url: '/system/project_info',
     method: 'post',
     data
   })
 }
-
+// 查看项目评委列表
 export function getExpertInfo(id) {
   return request({
-    url: `https://m1.apifoxmock.com/m2/6065032-0-default/274095294?apifoxApiId=274095294`,
+    url: `/system/project_info/judge/${id}`,
     method: 'get',
-    params: {
-      id
-    }
   })
 }

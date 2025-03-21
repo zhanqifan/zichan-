@@ -4,57 +4,31 @@
       已选择 {{ selectedCount }} / {{ totalCount }} 名专家
     </div>
 
-    <el-table
-      v-loading="loading"
-      :data="tableData"
-      style="width: 100%">
-      <el-table-column
-        type="index"
-        label="序号"
-        width="80"
-        align="center">
+    <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <el-table-column type="index" label="序号" width="80" align="center">
       </el-table-column>
-      <el-table-column
-        prop="judgeName"
-        label="姓名"
-        align="center">
+      <el-table-column prop="judgeName" label="姓名" align="center">
       </el-table-column>
-      <el-table-column
-        prop="workLocation"
-        label="单位"
-        align="center">
+      <el-table-column prop="workLocation" label="单位" align="center">
       </el-table-column>
-      <el-table-column
-        prop="contactInformation"
-        label="联系方式"
-        align="center">
+      <el-table-column prop="contactInformation" label="联系方式" align="center">
       </el-table-column>
-      <el-table-column
-        label="到场状态"
-        align="center">
+      <el-table-column label="到场状态" align="center">
         <template slot-scope="scope">
           <div class="status-buttons">
-            <el-tag
-              class="status-button"
-              :type="scope.row.status === 1 ? 'success' : 'info'"
-              @click="handleConfirm(scope.row,1)"
-              >
-             到场
+            <el-tag class="status-button" :type="scope.row.status === 1 ? 'success' : 'info'"
+              @click="handleConfirm(scope.row, 1)">
+              到场
             </el-tag>
-            <el-tag
-              class="status-button"
-              :type="scope.row.status === 0 ? 'danger' : 'info'"
-               @click="handleConfirm(scope.row,0)"
-              >
-               补录
+            <el-tag class="status-button" :type="scope.row.status === 0 ? 'danger' : 'info'"
+              @click="handleConfirm(scope.row, 0)">
+              补录
             </el-tag>
 
           </div>
         </template>
       </el-table-column>
-      <el-table-column
-        label="备注"
-        align="center">
+      <el-table-column label="备注" align="center">
         <template slot-scope="scope">
           <el-input v-model="scope.row.remark"></el-input>
         </template>
@@ -72,7 +46,7 @@
 
 <script>
 import modal from '@/plugins/modal'
-import { getExpertInfo,updateExpertStatus } from '@/api/expert'
+import { getExpertInfo, updateExpertStatus } from '@/api/expert'
 import { mapState } from 'vuex'
 
 export default {
@@ -87,7 +61,7 @@ export default {
     ...mapState('processStatus', ['processId']),
 
     selectedCount() {
-      return this.tableData.filter(item => item.status===true).length===this.totalCount?'确认':'点击补录'
+      return this.tableData.filter(item => item.status === true).length === this.totalCount ? '确认' : '点击补录'
     }
   },
   methods: {
@@ -96,24 +70,21 @@ export default {
       try {
         this.loading = true;
         const res = await getExpertInfo(this.processId);
-        this.tableData = res.data.map(item => ({
-          ...item,
-          attendance: ''
-        }));
+        this.tableData = res.data
       } catch (error) {
         this.$message.error('获取专家信息失败');
       } finally {
         this.loading = false;
       }
     },
-     async handleConfirm(row, status) {
-       row.status = status;
-       const res =await updateExpertStatus({
-        project_id:this.processId,
-        judge_id:row.id,
-        state:status,
-        remark:row.remark
-       })
+    async handleConfirm(row, status) {
+      row.status = status;
+      const res = await updateExpertStatus({
+        project_id: this.processId,
+        judge_id: row.id,
+        state: status,
+        remarks: row.remark
+      })
 
     },
 
@@ -170,18 +141,22 @@ export default {
     padding: 12px 0;
   }
 }
+
 .status-button {
   cursor: pointer;
 }
+
 .status-buttons {
   display: flex;
   justify-content: center;
   gap: 8px;
 
 }
+
 ::v-deep .el-button--success.is-plain:hover {
   background-color: '';
 }
+
 .table-footer {
   margin-top: 20px;
   display: flex;
@@ -192,6 +167,7 @@ export default {
 :deep(.el-input) {
   .el-input__inner {
     border-radius: 4px;
+
     &::placeholder {
       color: #c0c4cc;
     }
@@ -201,6 +177,7 @@ export default {
 :deep(.el-button--text) {
   padding: 0;
   font-size: 14px;
+
   &:hover {
     text-decoration: underline;
   }

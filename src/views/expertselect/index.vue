@@ -1,20 +1,20 @@
 <template>
   <div class="expert-select-container">
-    <el-steps :active="processStatusIndex" finish-status="success"  style="margin-bottom: 30px;">
-  <el-step :title="item.name" v-for="(item,index) in processStatus" :key="index"></el-step>
-</el-steps>
-   <div class="section" v-show="processStatusIndex === 0">
-    <processStatus></processStatus>
-   </div>
-   <div class="section" v-show="processStatusIndex === 1">
-    <expertConfirm></expertConfirm>
-   </div>
-   <div class="section" v-show="processStatusIndex === 2">
-    <expertRecruit></expertRecruit>
-   </div>
-   <div class="section" v-show="processStatusIndex === 3">
-    <expertResult></expertResult>
-   </div>
+    <el-steps :active="processStatusIndex" finish-status="success" style="margin-bottom: 30px;">
+      <el-step :title="item.name" v-for="(item, index) in processStatus" :key="index"></el-step>
+    </el-steps>
+    <div class="section" v-show="processStatusIndex === 0">
+      <processStatus></processStatus>
+    </div>
+    <div class="section" v-if="processStatusIndex === 1">
+      <expertConfirm></expertConfirm>
+    </div>
+    <div class="section" v-if="processStatusIndex === 2">
+      <expertRecruit></expertRecruit>
+    </div>
+    <div class="section" v-if="processStatusIndex === 3">
+      <expertResult></expertResult>
+    </div>
   </div>
 </template>
 
@@ -57,9 +57,8 @@ export default {
     background: white;
     padding: 24px;
     border-radius: 8px;
-    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.05);
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
     margin-bottom: 24px;
   }
 }
-
 </style>

@@ -4,18 +4,20 @@
       <div class="section">
         <div class="section-title">项目基本信息</div>
         <el-form :model="projectForm" :rules="rules" ref="projectForm" label-width="120px">
-          <el-form-item label="项目名称" prop="name">
-            <el-input v-model="projectForm.name" placeholder="请输入项目名称"></el-input>
+          <el-form-item label="项目名称" prop="projectName">
+            <el-input v-model="projectForm.projectName" placeholder="请输入项目名称"></el-input>
           </el-form-item>
           <el-form-item label="评审时间" prop="reviewTime">
-            <el-date-picker v-model="projectForm.reviewTime" type="datetime"   placeholder="选择日期时间"></el-date-picker>
+            <el-date-picker v-model="projectForm.reviewTime" type="datetime" value-format="yyyy-MM-dd HH:mm:ss"
+              placeholder="选择日期时间"></el-date-picker>
           </el-form-item>
-          <el-form-item label="专家抽取人数" prop="expertCount">
-            <el-input-number v-model="projectForm.expertCount" :min="1" :max="10"></el-input-number>
+          <el-form-item label="专家抽取人数" prop="judgeNum">
+            <el-input-number v-model="projectForm.judgeNum" :min="1"></el-input-number>
           </el-form-item>
-          <el-form-item label="专家类别" prop="expertType">
-            <el-select v-model="projectForm.expertType" placeholder="请选择专家类别" multiple>
-                <el-option :label="item.categoryName" :value="item.id" v-for="item in expertOptions" :key="item.id"></el-option>
+          <el-form-item label="专家类别" prop="categorys">
+            <el-select v-model="projectForm.categorys" placeholder="请选择专家类别" multiple>
+              <el-option :label="item.categoryName" :value="item.id" v-for="item in expertOptions"
+                :key="item.id"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item>
@@ -33,23 +35,24 @@
 </template>
 
 <script>
-import { getExpertList,postProjectInfo } from '@/api/expert'
+import modal from '@/plugins/modal'
+import { getExpertList, postProjectInfo } from '@/api/expert'
 
 export default {
   data() {
     return {
       loading: false,
       projectForm: {
-        name: '',
+        projectName: '',
         reviewTime: '',
-        expertCount: 5,
-        expertType: []
+        judgeNum: 5,
+        categorys: []
       },
       expertOptions: [],
       rules: {
-        name: [{ required: true, message: '请输入项目名称', trigger: 'blur' }],
+        projectName: [{ required: true, message: '请输入项目名称', trigger: 'blur' }],
         reviewTime: [{ required: true, message: '请选择评审时间', trigger: 'change' }],
-        expertType: [{ required: true, message: '请选择专家类别', trigger: 'change' }]
+        categorys: [{ required: true, message: '请选择专家类别', trigger: 'change' }]
       },
     };
   },
@@ -57,9 +60,14 @@ export default {
     async submitProjectForm() {
       this.$refs.projectForm.validate(async (valid) => {
         if (valid) {
-          const res =await postProjectInfo(this.projectForm)
-          this.$store.commit('processStatus/SET_PROCESS_STATUS', 1)
-          this.$store.commit('processStatus/SET_PROCESS_ID', res.data.id)
+          try {
+            const res = await postProjectInfo({ ...this.projectForm, categorys: `[${this.projectForm.categorys}]` })
+            this.$store.commit('processStatus/SET_PROCESS_STATUS', 1)
+            this.$store.commit('processStatus/SET_PROCESS_ID', res.data.id)
+          } catch (error) {
+            modal.notifyError("专家类别所选数量与抽取人数不匹配")
+          }
+
         }
       })
     },
@@ -69,7 +77,7 @@ export default {
   },
   created() {
     getExpertList().then(res => {
-      this.expertOptions=res.rows
+      this.expertOptions = res.rows
     })
   }
 };
@@ -81,7 +89,7 @@ export default {
   border-radius: 8px;
   padding: 30px;
   margin-bottom: 24px;
-  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.05);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
 
   .el-form {
     max-width: 800px;
@@ -104,10 +112,13 @@ export default {
 
 
 
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.3s, transform 0.3s;
 }
-.fade-enter, .fade-leave-to {
+
+.fade-enter,
+.fade-leave-to {
   opacity: 0;
   transform: translateY(10px);
 }

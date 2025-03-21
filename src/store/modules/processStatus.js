@@ -1,5 +1,5 @@
 const state = {
-   processStatus: [
+  processStatus: [
     {
       name: '填写项目信息',
     },
@@ -13,14 +13,14 @@ const state = {
       name: '存档与打印',
     },
   ],
-  processId: '',
-  processStatusIndex:0
+  processId: "1902901134562127872",
+  processStatusIndex: 0
 }
 const mutations = {
-  SET_PROCESS_STATUS: (state,value) => {
-      state.processStatusIndex = value
+  SET_PROCESS_STATUS: (state, value) => {
+    state.processStatusIndex = value
   },
-  SET_PROCESS_ID: (state,value) => {
+  SET_PROCESS_ID: (state, value) => {
     state.processId = value
   },
   RESET_PROCESS: (state) => {
