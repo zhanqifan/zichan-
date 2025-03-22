@@ -9,10 +9,8 @@
     <div class="section" v-if="processStatusIndex === 1">
       <expertConfirm></expertConfirm>
     </div>
+
     <div class="section" v-if="processStatusIndex === 2">
-      <expertRecruit></expertRecruit>
-    </div>
-    <div class="section" v-if="processStatusIndex === 3">
       <expertResult></expertResult>
     </div>
   </div>
@@ -21,14 +19,12 @@
 <script>
 import processStatus from './component/projectMsg.vue'
 import expertConfirm from './component/expertConfirm.vue'
-import expertRecruit from './component/expertRecruit.vue'
 import expertResult from './component/archiveAndPrint.vue'
 import { mapState } from 'vuex'
 export default {
   components: {
     processStatus,
     expertConfirm,
-    expertRecruit,
     expertResult
   },
   data() {

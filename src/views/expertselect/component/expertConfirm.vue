@@ -1,7 +1,14 @@
 <template>
   <div class="expert-confirm">
     <div class="expert-header">
-      已选择 {{ selectedCount }} / {{ totalCount }} 名专家
+      <div class="stat-item">
+        <div class="number">{{ selectedCount }}</div>
+        <div class="label">确认到场</div>
+      </div>
+      <div class="stat-item warning">
+        <div class="number">{{ tableData.length - selectedCount }}</div>
+        <div class="label">待补录</div>
+      </div>
     </div>
 
     <el-table v-loading="loading" :data="tableData" style="width: 100%">
@@ -16,13 +23,9 @@
       <el-table-column label="到场状态" align="center">
         <template slot-scope="scope">
           <div class="status-buttons">
-            <el-tag class="status-button" :type="scope.row.status === 1 ? 'success' : 'info'"
-              @click="handleConfirm(scope.row, 1)">
-              到场
-            </el-tag>
-            <el-tag class="status-button" :type="scope.row.status === 0 ? 'danger' : 'info'"
-              @click="handleConfirm(scope.row, 0)">
-              补录
+            <el-tag  :type="scope.row.status === 1 ? 'success' :scope.row.status===0 ? 'primary' : 'danger'"
+          >
+              {{ scope.row.status === 1 ? '到场' : scope.row.status === 0 ? '待确认' : '补录' }}
             </el-tag>
 
           </div>
@@ -33,20 +36,24 @@
           <el-input v-model="scope.row.remark"></el-input>
         </template>
       </el-table-column>
-
-
+      <el-table-column label="操作" align="center">
+        <template slot-scope="scope">
+          <el-button type="text"     @click="handleConfirm(scope.row, 1)" >确认</el-button>
+          <el-button type="text"     @click="handleConfirm(scope.row, 2)" >补录</el-button>
+        </template>
+      </el-table-column>
     </el-table>
 
     <div class="table-footer">
       <el-button @click="handleBack">返回</el-button>
-      <el-button type="primary" @click="handleNext">下一步</el-button>
+      <el-button type="primary" @click="handleNext"  v-if="tableData.length - selectedCount==0" >下一步</el-button>
+      <el-button type="primary" @click="handleRecord" v-else>开始补录</el-button>
     </div>
   </div>
 </template>
 
 <script>
-import modal from '@/plugins/modal'
-import { getExpertInfo, updateExpertStatus } from '@/api/expert'
+import { getExpertInfo, updateExpertStatus,recordExpert } from '@/api/expert'
 import { mapState } from 'vuex'
 
 export default {
@@ -58,18 +65,22 @@ export default {
     };
   },
   computed: {
-    ...mapState('processStatus', ['processId']),
-
+    ...mapState('processStatus', [
+      'projectData',
+      'projectId'
+    ]),
     selectedCount() {
-      return this.tableData.filter(item => item.status === true).length === this.totalCount ? '确认' : '点击补录'
-    }
+      return this.tableData.filter(item => item.status === 1).length
+    },
+
   },
   methods: {
+    // 获取列表
     async getExpertInfo() {
-      if (!this.processId) return;
+      if (!this.projectId) return;
       try {
         this.loading = true;
-        const res = await getExpertInfo(this.processId);
+        const res = await getExpertInfo(this.projectId);
         this.tableData = res.data
       } catch (error) {
         this.$message.error('获取专家信息失败');
@@ -77,19 +88,25 @@ export default {
         this.loading = false;
       }
     },
+    // 确认到场状态
     async handleConfirm(row, status) {
-      row.status = status;
-      const res = await updateExpertStatus({
-        project_id: this.processId,
-        judge_id: row.id,
+     row.status=status
+      await updateExpertStatus({
+        projectId: this.projectId,
+        judgeId: row.id,
         state: status,
         remarks: row.remark
       })
-
     },
 
-    handleViewDetail(row) {
-      // 实现查看详情逻辑
+    async handleRecord(row) {
+        const res =await recordExpert({
+          id:  this.projectId,
+            categorys: this.projectData.categorys,
+            judgeNum:this.tableData.length - this.selectedCount
+        })
+
+        this.getExpertInfo()
     },
     handleBack() {
       this.$store.commit('processStatus/SET_PROCESS_STATUS', 0);
@@ -104,14 +121,16 @@ export default {
     }
   },
   watch: {
-    processId: {
+    projectId: {
       immediate: true,
       handler(newVal) {
         if (newVal) {
+          console.log(newVal)
           this.getExpertInfo();
         }
       }
-    }
+    },
+
   }
 };
 </script>
@@ -123,10 +142,37 @@ export default {
   border-radius: 8px;
 
   .expert-header {
-    font-size: 14px;
-    color: #606266;
-    margin-bottom: 20px;
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    gap: 24px;
+    margin-bottom: 24px;
+    padding: 16px 24px;
+    background: #f8f9fc;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+
+    .stat-item {
+      text-align: center;
+
+      .number {
+        font-size: 24px;
+        font-weight: 600;
+        color: #409EFF;
+        line-height: 1.4;
+        margin-bottom: 4px;
+      }
+
+      .label {
+        font-size: 14px;
+        color: #606266;
+      }
+
+      &.warning {
+        .number {
+          color: #E6A23C;
+        }
+      }
+    }
   }
 }
 

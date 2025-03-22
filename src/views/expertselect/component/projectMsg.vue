@@ -67,8 +67,7 @@ export default {
         if (valid) {
           const res = await postProjectInfo({ ...this.projectForm, categorys: `[${this.projectForm.categorys}]` })
           this.$store.commit('processStatus/SET_PROCESS_STATUS', 1)
-          this.$store.commit('processStatus/SET_PROCESS_ID', res.data.id)
-
+          this.$store.commit('processStatus/SET_PROJECT_DATA', res.data)
         }
       })
     },
@@ -78,8 +77,9 @@ export default {
 
   },
   created() {
-    getExpertList().then(res => {
+    getExpertList({pageNum: 1, pageSize: 9999}).then(res => {
       this.expertOptions = res.rows
+      this.$store.commit('processStatus/SET_PROJECT_OPTIONS', res.rows)
     })
   }
 };
