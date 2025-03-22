@@ -58,13 +58,16 @@
       <div class="action-buttons">
         <el-button @click="handleBack">返回</el-button>
         <div class="right-buttons">
-          <el-button type="primary" @click="handlePrint">打印确认单</el-button>
+          <el-button @click="handlePreview">预览</el-button>
+          <el-button type="primary" @click="printWord">打印确认单</el-button>
+          <el-button type="primary" @click="handleDownload">下载确认单</el-button>
         </div>
       </div>
 
     </div>
     <el-dialog :visible.sync="dialogVisible" width="80%">
         <DocxPreview :fileUrl="fileUrl"  />
+
       </el-dialog>
   </div>
 </template>
@@ -122,20 +125,55 @@ export default {
     handleBack() {
       this.$store.commit('processStatus/SET_PROCESS_STATUS', 1)
     },
+    async printWord() {
 
-    async handlePrint() {
-      // TODO: 实现打印功能
+      // const res = await printConfirm(this.projectId)
+      // const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      // const url = URL.createObjectURL(blob);
+      // if (!url) {
+      //   this.$message.warning('请先加载文档');
+      //   return;
+      // }
+      printJS({
+        printable: 'https://501351981.github.io/vue-office/examples/dist/static/test-files/test.pdf',
+        type: 'pdf', // 尝试以PDF方式打印
+        showModal: true,
+        modalMessage: '准备打印...',
+        onLoadingEnd: () => {
+          console.log('打印完成');
+        }
+      });
+    },
+    // async handlePrint() {
+    //   // TODO: 实现打印功能
+    //   const res = await printConfirm(this.projectId)
+    //   const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    //   const url = URL.createObjectURL(blob);
+
+    //   this.fileUrl = url
+    //   console.log(this.fileUrl)
+    //   this.dialogVisible = true
+    // },
+    async handlePreview(){
+  const res = await printConfirm(this.projectId)
+      const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      const url = URL.createObjectURL(blob);
+      if (!url) {
+        this.$message.warning('请先加载文档');
+        return;
+      }
+      this.fileUrl = url
+      this.dialogVisible = true
+    },
+    // 下载
+    async handleDownload() {
       const res = await printConfirm(this.projectId)
       const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
       const url = URL.createObjectURL(blob);
-      // // 下载
-      // const a = document.createElement('a')
-      // a.href = url
-      // a.download = '确认单.docx'
-      // a.click()
-      this.fileUrl = url
-      console.log(this.fileUrl)
-      this.dialogVisible = true
+      const a = document.createElement('a')
+      a.href = url
+      a.download = '确认单.docx'
+      a.click()
     }
   },
 

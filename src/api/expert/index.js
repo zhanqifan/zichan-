@@ -74,3 +74,48 @@ export function getProjectList(queryParams) {
     params: queryParams
   })
 }
+// 查看项目详情
+export function getProjectDetail(id) {
+  return request({
+    url: `/system/project_info/${id}`,
+    method: 'get',
+  })
+}
+// 获取专家列表
+export function getExpertInfoList(queryParams) {
+  return request({
+    url: '/system/judge_info/list',
+    method: 'get',
+    params: queryParams
+  })
+}
+// 新增专家
+export function addExpert(data) {
+  return request({
+    url: '/system/judge_info',
+    method: 'post',
+    data
+  })
+}
+// 修改专家
+export function updateExpert(data) {
+  return request({
+    url: '/system/judge_info',
+    method: 'put',
+    data
+  })
+}
+// 删除专家
+export function deleteExpert(id) {
+  return request({
+    url: `/system/judge_info/${id}`,
+    method: 'delete',
+  })
+}
+// 查询专家详情(回显)
+export function getExpertDetail(id) {
+  return request({
+    url: `/system/judge_info/${id}`,
+    method: 'get',
+  })
+}
