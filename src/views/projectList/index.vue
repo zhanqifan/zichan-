@@ -2,13 +2,13 @@
   <div class="expert-type">
 
     <div class="table-header">
-      <el-form :model="queryParams" inline label-width="100px">
+      <el-form :model="queryParams" inline  size="mini" label-width="100px">
         <el-form-item label="项目名称">
           <el-input v-model="queryParams.projectName" placeholder="请输入项目名称" style="width: 200px;" />
         </el-form-item>
         <el-form-item >
-          <el-button icon="el-icon-search" type="primary"  @click="getList">搜索</el-button>
-          <el-button icon="el-icon-refresh"  @click="resetQuery">重置</el-button>
+          <el-button icon="el-icon-search" size="mini" type="primary"  @click="getList">搜索</el-button>
+          <el-button icon="el-icon-refresh" size="mini"  @click="resetQuery">重置</el-button>
         </el-form-item>
       </el-form>
 

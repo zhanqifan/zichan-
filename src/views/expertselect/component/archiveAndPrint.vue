@@ -59,7 +59,7 @@
         <el-button @click="handleBack">返回</el-button>
         <div class="right-buttons">
           <el-button @click="handlePreview">预览</el-button>
-          <el-button type="primary" @click="printWord">打印确认单</el-button>
+
           <el-button type="primary" @click="handleDownload">下载确认单</el-button>
         </div>
       </div>
@@ -67,7 +67,6 @@
     </div>
     <el-dialog :visible.sync="dialogVisible" width="80%">
         <DocxPreview :fileUrl="fileUrl"  />
-
       </el-dialog>
   </div>
 </template>
@@ -76,13 +75,15 @@
 import { getExpertInfo, printConfirm } from '@/api/expert'
 import { mapState } from 'vuex'
 import DocxPreview from '@/components/vueoffice/index.vue'
-import printJS from 'print-js'
 export default {
   components: {
     DocxPreview
   },
+
   data() {
     return {
+      docx :null,
+      previewLoading:false,
       projectInfo: {
         name: '',
         reviewTime: '',
@@ -99,14 +100,6 @@ export default {
     expertOptions() {
       return JSON.parse(this.projectData.categorys).map(item => this.projectOptions.find(option => option.id === item).categoryName).join('、');
 
-      // return this.projectOptions
-      //   .reduce((names, item) => {
-      //     if (this.projectData.categorys.includes(item.id)) {
-      //       names.push(item.categoryName);
-      //     }
-      //     return names;
-      //   }, [])
-      //   .join('、');
     }
   },
 
@@ -122,28 +115,29 @@ export default {
         this.$message.error('获取数据失败')
       }
     },
+
     handleBack() {
       this.$store.commit('processStatus/SET_PROCESS_STATUS', 1)
     },
-    async printWord() {
+    // async printWord() {
 
-      // const res = await printConfirm(this.projectId)
-      // const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-      // const url = URL.createObjectURL(blob);
-      // if (!url) {
-      //   this.$message.warning('请先加载文档');
-      //   return;
-      // }
-      printJS({
-        printable: 'https://501351981.github.io/vue-office/examples/dist/static/test-files/test.pdf',
-        type: 'pdf', // 尝试以PDF方式打印
-        showModal: true,
-        modalMessage: '准备打印...',
-        onLoadingEnd: () => {
-          console.log('打印完成');
-        }
-      });
-    },
+    //   // const res = await printConfirm(this.projectId)
+    //   // const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    //   // const url = URL.createObjectURL(blob);
+    //   // if (!url) {
+    //   //   this.$message.warning('请先加载文档');
+    //   //   return;
+    //   // }
+    //   printJS({
+    //     printable: 'https://501351981.github.io/vue-office/examples/dist/static/test-files/test.pdf',
+    //     type: 'pdf', // 尝试以PDF方式打印
+    //     showModal: true,
+    //     modalMessage: '准备打印...',
+    //     onLoadingEnd: () => {
+    //       console.log('打印完成');
+    //     }
+    //   });
+    // },
     // async handlePrint() {
     //   // TODO: 实现打印功能
     //   const res = await printConfirm(this.projectId)

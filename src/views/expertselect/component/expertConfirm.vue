@@ -100,6 +100,11 @@ export default {
     },
 
     async handleRecord(row) {
+      // 存在待确认的专家不允许补录
+      if(this.tableData.some(item=>item.status===0)){
+        this.$message.warning('请先确认到场状态')
+        return
+      }
         const res =await recordExpert({
           id:  this.projectId,
             categorys: this.projectData.categorys,
