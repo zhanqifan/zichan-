@@ -65,9 +65,17 @@ export default {
     async submitProjectForm() {
       this.$refs.projectForm.validate(async (valid) => {
         if (valid) {
-          const res = await postProjectInfo({ ...this.projectForm, categorys: `[${this.projectForm.categorys}]` })
-          this.$store.commit('processStatus/SET_PROCESS_STATUS', 1)
-          this.$store.commit('processStatus/SET_PROJECT_DATA', res.data)
+          try {
+            this.loading = true
+            const res = await postProjectInfo({ ...this.projectForm, categorys: `[${this.projectForm.categorys}]` })
+            this.$store.commit('processStatus/SET_PROCESS_STATUS', 1)
+            this.$store.commit('processStatus/SET_PROJECT_DATA', res.data)
+            this.loading = false
+          } catch (error) {
+            this.loading = false
+          }
+
+
         }
       })
     },
@@ -77,7 +85,7 @@ export default {
 
   },
   created() {
-    getExpertList({pageNum: 1, pageSize: 9999}).then(res => {
+    getExpertList({ pageNum: 1, pageSize: 9999 }).then(res => {
       this.expertOptions = res.rows
       this.$store.commit('processStatus/SET_PROJECT_OPTIONS', res.rows)
     })

@@ -5,8 +5,12 @@
         <div class="number">{{ selectedCount }}</div>
         <div class="label">确认到场</div>
       </div>
+      <div class="stat-item">
+        <div class="number">{{ waitConfirmCount }}</div>
+        <div class="label"> 待确认</div>
+      </div>
       <div class="stat-item warning">
-        <div class="number">{{ tableData.length - selectedCount }}</div>
+        <div class="number">{{ needRecordCount }}</div>
         <div class="label">待补录</div>
       </div>
     </div>
@@ -23,8 +27,7 @@
       <el-table-column label="到场状态" align="center">
         <template slot-scope="scope">
           <div class="status-buttons">
-            <el-tag  :type="scope.row.status === 1 ? 'success' :scope.row.status===0 ? 'primary' : 'danger'"
-          >
+            <el-tag :type="scope.row.status === 1 ? 'success' : scope.row.status === 0 ? 'primary' : 'danger'">
               {{ scope.row.status === 1 ? '到场' : scope.row.status === 0 ? '待确认' : '补录' }}
             </el-tag>
 
@@ -38,22 +41,22 @@
       </el-table-column>
       <el-table-column label="操作" align="center">
         <template slot-scope="scope">
-          <el-button type="text"     @click="handleConfirm(scope.row, 1)" >确认</el-button>
-          <el-button type="text"     @click="handleConfirm(scope.row, 2)" >补录</el-button>
+          <el-button type="text" @click="handleConfirm(scope.row, 1)">确认</el-button>
+          <el-button type="text" @click="handleConfirm(scope.row, 2)">补录</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <div class="table-footer">
       <el-button @click="handleBack">返回</el-button>
-      <el-button type="primary" @click="handleNext"  v-if="tableData.length - selectedCount==0" >下一步</el-button>
+      <el-button type="primary" @click="handleNext" v-if="tableData.length - selectedCount == 0">下一步</el-button>
       <el-button type="primary" @click="handleRecord" v-else>开始补录</el-button>
     </div>
   </div>
 </template>
 
 <script>
-import { getExpertInfo, updateExpertStatus,recordExpert } from '@/api/expert'
+import { getExpertInfo, updateExpertStatus, recordExpert } from '@/api/expert'
 import { mapState } from 'vuex'
 
 export default {
@@ -72,6 +75,13 @@ export default {
     selectedCount() {
       return this.tableData.filter(item => item.status === 1).length
     },
+    waitConfirmCount() {
+      return this.tableData.filter(item => item.status === 0).length
+    },
+    needRecordCount() {
+      return this.tableData.filter(item => item.status === 2).length
+    }
+
 
   },
   methods: {
@@ -90,7 +100,7 @@ export default {
     },
     // 确认到场状态
     async handleConfirm(row, status) {
-     row.status=status
+      row.status = status
       await updateExpertStatus({
         projectId: this.projectId,
         judgeId: row.id,
@@ -101,17 +111,17 @@ export default {
 
     async handleRecord(row) {
       // 存在待确认的专家不允许补录
-      if(this.tableData.some(item=>item.status===0)){
+      if (this.tableData.some(item => item.status === 0)) {
         this.$message.warning('请先确认到场状态')
         return
       }
-        const res =await recordExpert({
-          id:  this.projectId,
-            categorys: this.projectData.categorys,
-            judgeNum:this.tableData.length - this.selectedCount
-        })
+      const res = await recordExpert({
+        id: this.projectId,
+        categorys: this.projectData.categorys,
+        judgeNum: this.tableData.length - this.selectedCount
+      })
 
-        this.getExpertInfo()
+      this.getExpertInfo()
     },
     handleBack() {
       this.$store.commit('processStatus/SET_PROCESS_STATUS', 0);

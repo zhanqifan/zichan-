@@ -26,29 +26,14 @@
       <!-- 专家名单表格 -->
       <div class="expert-list">
         <div class="sub-title">出席专家名单</div>
-        <el-table
-          :data="tableData"
-          style="width: 100%">
-          <el-table-column
-            type="index"
-            label="序号"
-            width="80"
-            align="center">
+        <el-table :data="tableData" style="width: 100%">
+          <el-table-column type="index" label="序号" width="80" align="center">
           </el-table-column>
-          <el-table-column
-            prop="judgeName"
-            label="姓名"
-            align="center">
+          <el-table-column prop="judgeName" label="姓名" align="center">
           </el-table-column>
-          <el-table-column
-            prop="workLocation"
-            label="单位"
-            align="center">
+          <el-table-column prop="workLocation" label="单位" align="center">
           </el-table-column>
-          <el-table-column
-            prop="contactInformation"
-            label="联系方式"
-            align="center">
+          <el-table-column prop="contactInformation" label="联系方式" align="center">
           </el-table-column>
 
         </el-table>
@@ -66,14 +51,16 @@
 
     </div>
     <el-dialog :visible.sync="dialogVisible" width="80%">
-        <DocxPreview :fileUrl="fileUrl"  />
-      </el-dialog>
+      <el-button @click="handlePrint">打印</el-button>
+      <DocxPreview :fileUrl="fileUrl" />
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { getExpertInfo, printConfirm } from '@/api/expert'
 import { mapState } from 'vuex'
+import PrintJS from 'print-js'
 import DocxPreview from '@/components/vueoffice/index.vue'
 export default {
   components: {
@@ -82,8 +69,8 @@ export default {
 
   data() {
     return {
-      docx :null,
-      previewLoading:false,
+      docx: null,
+      previewLoading: false,
       projectInfo: {
         name: '',
         reviewTime: '',
@@ -138,18 +125,16 @@ export default {
     //     }
     //   });
     // },
-    // async handlePrint() {
-    //   // TODO: 实现打印功能
-    //   const res = await printConfirm(this.projectId)
-    //   const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-    //   const url = URL.createObjectURL(blob);
-
-    //   this.fileUrl = url
-    //   console.log(this.fileUrl)
-    //   this.dialogVisible = true
-    // },
-    async handlePreview(){
-  const res = await printConfirm(this.projectId)
+    async handlePrint() {
+      // TODO: 实现打印功能
+      PrintJS({
+        printable: this.fileUrl,
+        type: 'raw-html',
+        showModal: true
+      })
+    },
+    async handlePreview() {
+      const res = await printConfirm(this.projectId)
       const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
       const url = URL.createObjectURL(blob);
       if (!url) {
@@ -158,6 +143,9 @@ export default {
       }
       this.fileUrl = url
       this.dialogVisible = true
+    },
+    async handlePrint() {
+      window.open(this.fileUrl, '_blank')
     },
     // 下载
     async handleDownload() {
@@ -171,7 +159,7 @@ export default {
     }
   },
 
-   watch: {
+  watch: {
     projectId: {
       immediate: true,
       handler(newVal) {
@@ -254,6 +242,4 @@ export default {
     display: none !important;
   }
 }
-
-
 </style>

@@ -2,24 +2,20 @@
   <div class="expert-type">
 
     <div class="table-header">
-      <el-form :model="queryParams" inline  size="mini" label-width="100px">
+      <el-form :model="queryParams" inline size="mini" label-width="100px">
         <el-form-item label="项目名称">
           <el-input v-model="queryParams.projectName" placeholder="请输入项目名称" style="width: 200px;" />
         </el-form-item>
-        <el-form-item >
-          <el-button icon="el-icon-search" size="mini" type="primary"  @click="getList">搜索</el-button>
-          <el-button icon="el-icon-refresh" size="mini"  @click="resetQuery">重置</el-button>
+        <el-form-item>
+          <el-button icon="el-icon-search" size="mini" type="primary" @click="getList">搜索</el-button>
+          <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
         </el-form-item>
       </el-form>
 
     </div>
 
-    <el-table
-      v-loading="loading"
-      :data="tableData"
-      style="width: 100%"
-    >
-      <el-table-column type="index" label="序号"  align="center" />
+    <el-table v-loading="loading" :data="tableData" style="width: 100%">
+      <el-table-column type="index" label="序号" align="center" />
       <el-table-column prop="projectName" label="项目名称" align="center" />
       <el-table-column prop="categorys" label="专家类别" align="center" show-overflow-tooltip>
         <template slot-scope="scope">
@@ -27,38 +23,27 @@
         </template>
       </el-table-column>
       <el-table-column prop="judgeNum" label="抽取人数" align="center" />
-      <el-table-column prop="reviewTime" label="评审时间" align="center"  />
-      <el-table-column prop="createTime" label="创建时间" align="center"  />
-      <el-table-column prop="createBy" label="创建人" align="center"  />
+      <el-table-column prop="reviewTime" label="评审时间" align="center" />
+      <el-table-column prop="createTime" label="创建时间" align="center" />
+      <el-table-column prop="createBy" label="创建人" align="center" />
       <el-table-column label="操作" align="center" width="200">
         <template slot-scope="scope">
-          <el-button
-            type="text"
-            @click="handleDetail(scope.row)"
-          >
+          <el-button type="text" @click="handleDetail(scope.row)">
             <i class="el-icon-view"></i> 查看
           </el-button>
-          <!-- <el-button
-            type="text"
-            class="delete-btn"
-            @click="handleDelete(scope.row)"
-          >
-            <i class="el-icon-delete"></i> 删除
-          </el-button> -->
+          <el-button type="text" @click="handleDownload(scope.row)">
+            <i class="el-icon-download"></i> 下载
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
     <!-- 分页 -->
-    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
+      @pagination="getList" />
 
     <!-- 项目详情弹窗 -->
-    <el-dialog
-      title="项目详情"
-      :visible.sync="detailDialogVisible"
-      width="800px"
-      :close-on-click-modal="false"
-      class="detail-dialog"
-    >
+    <el-dialog title="项目详情" :visible.sync="detailDialogVisible" width="800px" :close-on-click-modal="false"
+      class="detail-dialog">
       <div v-loading="detailLoading" class="detail-content">
         <!-- 项目基本信息 -->
         <div class="detail-section">
@@ -98,12 +83,7 @@
           <div class="section-title">
             <i class="el-icon-user"></i> 专家名单列表
           </div>
-          <el-table
-            :data="projectDetail.judgeList || []"
-            style="width: 100%"
-            size="small"
-            class="detail-table"
-          >
+          <el-table :data="projectDetail.judgeList || []" style="width: 100%" size="small" class="detail-table">
             <el-table-column type="index" label="序号" width="60" align="center" />
             <el-table-column prop="judgeName" label="专家姓名" align="center" />
             <el-table-column prop="workLocation" label="工作单位" align="center" />
@@ -118,18 +98,8 @@
     </el-dialog>
 
     <!-- 新增/编辑对话框 -->
-    <el-dialog
-      :title="dialogTitle"
-      :visible.sync="dialogVisible"
-      width="500px"
-      :close-on-click-modal="false"
-    >
-      <el-form
-        ref="form"
-        :model="form"
-        :rules="rules"
-        label-width="100px"
-      >
+    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="500px" :close-on-click-modal="false">
+      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="类别名称" prop="categoryName">
           <el-input v-model="form.categoryName" placeholder="请输入类别名称" />
         </el-form-item>
@@ -145,7 +115,7 @@
 </template>
 
 <script>
-import { getProjectList, getExpertList, getProjectDetail } from '@/api/expert'
+import { getProjectList, getExpertList, getProjectDetail, printConfirm } from '@/api/expert'
 export default {
   data() {
     return {
@@ -206,6 +176,15 @@ export default {
       } finally {
         this.loading = false
       }
+    },
+    async handleDownload(row) {
+      const res = await printConfirm(row.id)
+      const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a')
+      a.href = url
+      a.download = '确认单.docx'
+      a.click()
     },
     categorysFn(row) {
       try {
@@ -283,7 +262,7 @@ export default {
     }
   },
   created() {
-    getExpertList({pageNum: 1, pageSize: 9999}).then(res => {
+    getExpertList({ pageNum: 1, pageSize: 9999 }).then(res => {
       this.expertOptions = res.rows
     })
     this.getList()
